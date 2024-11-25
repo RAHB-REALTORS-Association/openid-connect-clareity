@@ -541,8 +541,20 @@ class OpenID_Connect_Generic_Client_Wrapper {
 			return new WP_Error( 'username-normalization-failed', __( "Username $transliterated_username could not be normalized" ), $transliterated_username );
 		}
 
+		// Check and strip "HB" prefix if present
+		if (stripos($normalized_username, 'hb') === 0) {
+			$normalized_username = substr($normalized_username, 2);
+		}
+
 		// copy the username for incrementing
 		$username = $normalized_username;
+
+		// Check if the normalized "stripped" username exists
+		if (username_exists($username)) {
+			return $username;
+		} else if (username_exists("hb" . $username)) {
+			return "hb" . $username;
+		}
 
 		if ( ! $this->settings->link_existing_users ) {
 			// original user gets "name"
